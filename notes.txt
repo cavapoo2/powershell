@@ -1,0 +1,103 @@
+POWERSHELL STUFF.
+----------------
+HELP
+----------------
+help command 
+help Get-Event
+
+#updates help
+update-help
+
+#search help - see what commands
+help *event*
+
+#help full
+help Get-EventLog -full
+
+#help example
+help Get-EventLog -example
+
+#help online
+help Get-Eventlog -online
+
+------------------
+PARAMS
+-----------------
+
+#positional params. LogName isnot optional.
+[-LogName] <string> [[-InstanceId] <Int64[]>]
+
+#optional param
+[-ComputerName
+
+-------------------------
+PROCESS
+-------------------------
+get-process
+
+-------------------------
+GET COMMANDS
+-------------------------
+#gets all command installed on the computer.
+get-command
+
+#gets all alias
+get-alias
+
+-------------------------------
+PROVIDERS
+-------------------------------
+#shows providers in current session
+get-psprovider
+
+#registry settings
+set-location -Path hkcu:
+set-location -Path software
+get-childitem
+set-itemproperty -path dwm -psproperty EnableAeroPeek -Value 0
+
+#create zero length file
+new-item -path c:\labs -ItemType Directory
+new-item -path c:\labs -Name test.txt -ItemType Directory
+
+#environment variables 
+get-item env:*
+get-item env:home*
+
+----------------------------------
+PIPELINE
+----------------------------------
+#export to csv
+Get-Process | Export-CSV temp.csv
+#import csv
+import-csv temp.csv
+
+#export to xml
+Get-Process | Export-Clixml temp.xml
+
+#diff
+Diff -reference (Import-CliXML ref.xml) -difference (Get-Process) -property Name
+
+#sending output to file
+Dir | Out-File name.txt
+Dir | Out-Default 
+
+#convert to html
+Get-Service | ConvertTo-HTML
+Get-Service | ConvertTo-HTML | Out-File services.html
+
+#modify the system
+Get-Process -name Notepad | Stop-Process
+
+#whatif use this to see what would have happened with dodgy commands
+Get-Process | stop-process -whatif
+
+#confirm which will show prompt are you sure
+Get-Service | Stop-Service -confirm
+
+#if you dont want to parse just read in raw data
+Get-Content temp.csv
+
+#output csv options , change delimiter, don't overwrite
+get-service | Export-Csv services.csv -Delimiter "|"
+
