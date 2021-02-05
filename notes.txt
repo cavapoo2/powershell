@@ -101,3 +101,101 @@ Get-Content temp.csv
 #output csv options , change delimiter, don't overwrite
 get-service | Export-Csv services.csv -Delimiter "|"
 
+--------------------------------------
+ADDING COMMANDS
+--------------------------------------
+#import a module
+import-module -Name DnsClient
+
+get-command -Module DnsClient
+
+#show installed modules
+get-module 
+
+#from module search for it
+help *name*
+
+#verbose - available for all commands 
+command -verbose
+
+#see book (pg 87) on how to auto load a profile script with modules pre-loaded
+
+#getting modules from internet
+PowerShellGet
+
+----------------------------------
+OBJECTS
+----------------------------------
+#show all columns
+Get-Process | ConvertTo-HTML | Out-File process.html
+
+#get members of an object
+Get-Process | gm
+
+#sorting objects
+Get-Process | Sort-Object -property Id
+
+#selecting objects
+Get-Process | Select-Object -property Name,ID | ConvertTo-Html | Out-File temp.html
+
+#removing objects
+Get-Process | Where-Object -property Name,ID | ConvertTo-Html | Out-File temp.html
+
+#random number
+Get-Random
+
+#date and time
+Get-Date
+Get-Date | select DayOfWeek
+
+#security
+Get-EventLog -LogName System -Newest 50 | Sort TimeGenerated,Index | Select Index.TimeGenerated,Source | Out-File elogs.txt
+
+-------------------------------------
+PIPELINE DEEPER
+-------------------------------------
+
+------------------------------------
+MULTI TASKING
+------------------------------------
+#create local job
+start-job -scriptblock {dir}
+
+#can also run jobs on remote computer
+start-job -scriptblock {get-eventlog security -computer server-r2}
+
+#same as above but only one computer
+start-job -scriptblock {get-eventlog security -computer localhost}
+
+#remote as a job
+invoke-command -command {get-process} -computername (get-content .\allservers.txt} -asjob -jobname MyRemoteJob
+
+#check job has finished
+Get-Job -id 1 | Format-List *
+
+#get results from a job
+receive-job -id 1
+
+#get child jobs
+get-job -id 1 | select-object -expand childjobs
+
+#remove jobs
+get-job | where { -not $_.HasMoreData } | remove-job
+
+#scheduled jobs - cached on disk
+Register-ScheduledJob -Name DailyProcList -ScriptBlock {Get-Process} -Trigger (New-JobTrigger -Daily -At 2am) -ScheduledJobOption -WakeToRun -RunElevated)
+
+#background job to find all powershell scripts on the drive
+Start-Job {dir c:\ -recurse -filter '*.ps1'}
+
+#same as above bu run it on remote servers
+Invoke-Command -scriptblock {dir c:\ -recurse -filter *.ps1} -computername (get-content computers.txt) -asjob
+
+#background job gets last n errors from system event log, export to CliXML, run each day
+$Trigger =  New-JobTrigger -At "6:00AM" -DaysOfWeek "Monday","Tuesday" -Weekly
+$command={Get-EventLog -LogName System -Newest 25 -EntryType Error | Export-Clixml c:\work\temp.xml}
+Register-ScheduledJob -Name "Get 25 system errors" -ScriptBlock
+$Command -Trigger $Trigger
+#check on what was created
+Get-ScheduledJob | Select *
+
