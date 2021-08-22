@@ -95,7 +95,7 @@ Get-Process | stop-process -whatif
 #confirm which will show prompt are you sure
 Get-Service | Stop-Service -confirm
 
-#if you dont want to parse just read in raw data
+#if you dont want to parse just read in raw data (read file)
 Get-Content temp.csv
 
 #output csv options , change delimiter, don't overwrite
@@ -126,6 +126,9 @@ PowerShellGet
 ----------------------------------
 OBJECTS
 ----------------------------------
+#if you do help command, then if parameter accepts Objects (or -InputObject psObjects), you know it can accept basically anything.
+#This means it accept a pipeline input. It can also accept objects of the type System.Diagnostics.Process.
+
 #show all columns
 Get-Process | ConvertTo-HTML | Out-File process.html
 
@@ -199,3 +202,111 @@ $Command -Trigger $Trigger
 #check on what was created
 Get-ScheduledJob | Select *
 
+#tracing commands. we used out-null here to supress the output of converto-html
+trace-command -Expression {get-process | convertto-html | out-null} -Name ParemeterBinding -PSHost
+
+#the what-if command. use this with a command to prevent the possibility of anything going wrong.
+stop-process -id 123 -whatif
+
+#scripting
+#comparisons
+# -eq, -ne, -gt, -ge, -lt, -le
+#string comparisons - case insensitive by default. use -ceq, or -cne to make them case sensitive
+#wildcards 
+'powershell' -like '*shell' => true
+'don' -notlike 'don*' => false
+'don' -like 'd?n' => true
+#power regular expression use the -match
+
+#arrays
+$arr = @('one','two','three')
+$arr -contains 'one' => true
+'two' -in $arr => true
+
+#if construct
+If (<expression>){
+    code
+}ElseIf (<expression>) {
+    code
+}Else {
+    code
+}
+
+#expressions must result in True or False
+if ($now.DayOfWeek -eq 'Monday' -AND $now.hour -gt 18)
+{
+    #do something
+}
+
+#ForEach contruct
+ForEach ($item in $collection)
+{
+    #do something
+}
+
+$data = foreach($n in $numbes)
+{
+    $n*3
+}
+$data | out-file data.txt
+
+#sequence of numbers
+1..10 # yeild list of numbers from 1 to 10
+
+#can pass sequence, dont always need to use foreach
+
+$s = Get-Process -Name bash
+$s | Write-Output
+
+#Switch construct
+switch (<principal>)
+{
+    <candidate> { <script block> }
+    <candidate> { <script block> }
+    default {<script block>}
+}
+#Switch with wild card
+switch -wildcard ($x)
+{
+    "*1*" {"Contains 1"}
+    "*5*" {"Contains 5"}
+    default {"no matches"}
+}
+
+#do while construct
+While (<condition>)
+{
+#code
+}
+
+Do {
+    #code
+}While (<condition>)
+
+#For construct
+For (<start>; <condition>; <action>)
+{
+}
+
+For($i =0; $i -lt 3; $i++)
+{
+    Write $i
+}
+
+#similar for
+0..3 | ForEach-Object {Write $_}
+
+#similar for
+ForEach ($thing in $objects)
+{
+    Write $thing
+}
+
+#Break construct
+ForEach ($comp in $computers)
+{
+    If (-not (Test-Ping $comp -quiet))
+    {
+        Break
+    }
+}
